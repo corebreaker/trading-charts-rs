@@ -12,7 +12,7 @@ members = [
 default-members = ["core", "leptos", "dioxus", "wasmbind-macro"]
 
 [workspace.package]
-version = "1.0.0"
+version = "1.1.0"
 edition = "2021"
 authors = ["Frédéric Meyer <frederic.meyer.77@gmail.com>"]
 description = "Rust bindings of Lightweight Charts with Leptos and Dioxus adapters"
