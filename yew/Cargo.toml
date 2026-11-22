@@ -1,0 +1,20 @@
+[package]
+name = "trading-charts-yew"
+readme = "README.md"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description.workspace = true
+repository.workspace = true
+documentation.workspace = true
+license.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+wasm-bindgen = { workspace = true }
+web-sys = { workspace = true }
+yew = { workspace = true }
+
+trading-charts-core = { path = "../core", version = "1.1", package = "trading-charts-core" }
