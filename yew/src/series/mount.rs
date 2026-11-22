@@ -12,13 +12,25 @@ use yew::prelude::*;
 /// Shared handle of a series, set once the series is added to the chart.
 pub(crate) type SeriesCell<Dat, Opt> = Rc<RefCell<Option<SeriesHandle<Dat, Opt>>>>;
 
-/// Latest values given to a series.
-struct SeriesValues<Dat, Opt> {
-    options:         Option<Opt>,
-    data:            Vec<Dat>,
-    markers:         Vec<Marker>,
-    markers_options: Option<SeriesMarkersOptions>,
-    price_lines:     Vec<PriceLineOptions>,
+/// Values given to a series. The hook keeps the latest ones from the effects which run when a value changes.
+pub(crate) struct SeriesValues<Dat, Opt> {
+    pub(crate) options:         Option<Opt>,
+    pub(crate) data:            Vec<Dat>,
+    pub(crate) markers:         Vec<Marker>,
+    pub(crate) markers_options: Option<SeriesMarkersOptions>,
+    pub(crate) price_lines:     Vec<PriceLineOptions>,
+}
+
+impl<Dat, Opt> Default for SeriesValues<Dat, Opt> {
+    fn default() -> Self {
+        Self {
+            options:         None,
+            data:            Vec::new(),
+            markers:         Vec::new(),
+            markers_options: None,
+            price_lines:     Vec::new(),
+        }
+    }
 }
 
 /// Add a series with the given values, after its pane is allocated.
@@ -84,32 +96,28 @@ where
 pub(crate) fn use_series<Dat, Opt>(
     marker: &NodeRef,
     series_type: &'static str,
-    options: Option<Opt>,
-    data: Vec<Dat>,
-    markers: Vec<Marker>,
-    markers_options: Option<SeriesMarkersOptions>,
-    price_lines: Vec<PriceLineOptions>,
+    given: SeriesValues<Dat, Opt>,
 ) -> SeriesCell<Dat, Opt>
 where
     Dat: Serialize + Clone + PartialEq + 'static,
     Opt: Serialize + Clone + PartialEq + 'static, {
+    let SeriesValues {
+        options,
+        data,
+        markers,
+        markers_options,
+        price_lines,
+    } = given;
     let chart = use_chart();
     let queue = use_mount_queue();
     let panel = use_panel();
     let handle: SeriesCell<Dat, Opt> = use_mut_ref(|| None);
-    let values = use_mut_ref(|| None::<SeriesValues<Dat, Opt>>);
-
-    *values.borrow_mut() = Some(SeriesValues {
-        options:         options.clone(),
-        data:            data.clone(),
-        markers:         markers.clone(),
-        markers_options: markers_options.clone(),
-        price_lines:     price_lines.clone(),
-    });
+    let values = use_mut_ref(SeriesValues::<Dat, Opt>::default);
 
     use_effect_with((), {
         let handle = handle.clone();
         let marker = marker.clone();
+        let values = values.clone();
 
         move |_| {
             let alive = Alive::new();
@@ -120,11 +128,10 @@ where
 
                 move || {
                     if alive.get() {
-                        if let Some(values) = values.borrow().as_ref() {
-                            let panel = panel.and_then(|panel| panel.get());
+                        let values = std::mem::take(&mut *values.borrow_mut());
+                        let panel = panel.and_then(|panel| panel.get());
 
-                            *handle.borrow_mut() = add_series(&chart, series_type, panel, values);
-                        }
+                        *handle.borrow_mut() = add_series(&chart, series_type, panel, &values);
                     }
                 }
             });
@@ -140,11 +147,18 @@ where
         }
     });
 
-    // The handle is not set yet on the first render: the series is added with the latest values.
+    // Until the series is added, the effects keep the latest values, which the series is added with.
+    // The effects run when a value changes, so the values are not copied at every render.
     use_effect_with(options, {
         let handle = handle.clone();
+        let values = values.clone();
 
         move |options| {
+            if handle.borrow().is_none() {
+                values.borrow_mut().options = options.clone();
+                return;
+            }
+
             if let (Some(handle), Some(options)) = (handle.borrow().as_ref(), options) {
                 if let Err(err) = handle.apply_options(options) {
                     err.with_prefix("Failed to update series options")
@@ -157,8 +171,14 @@ where
 
     use_effect_with(data, {
         let handle = handle.clone();
+        let values = values.clone();
 
         move |data| {
+            if handle.borrow().is_none() {
+                values.borrow_mut().data = data.clone();
+                return;
+            }
+
             if let Some(handle) = handle.borrow().as_ref() {
                 if let Err(err) = handle.set_data(data) {
                     err.with_prefix("Failed to update data")
@@ -171,8 +191,14 @@ where
 
     use_effect_with(markers, {
         let handle = handle.clone();
+        let values = values.clone();
 
         move |markers| {
+            if handle.borrow().is_none() {
+                values.borrow_mut().markers = markers.clone();
+                return;
+            }
+
             if let Some(handle) = handle.borrow().as_ref() {
                 if let Err(err) = handle.set_markers(markers) {
                     err.with_prefix("Failed to set markers")
@@ -185,8 +211,14 @@ where
 
     use_effect_with(markers_options, {
         let handle = handle.clone();
+        let values = values.clone();
 
         move |markers_options| {
+            if handle.borrow().is_none() {
+                values.borrow_mut().markers_options = markers_options.clone();
+                return;
+            }
+
             if let (Some(handle), Some(options)) = (handle.borrow().as_ref(), markers_options) {
                 if let Err(err) = handle.apply_markers_options(options) {
                     err.with_prefix("Failed to apply markers options").log();
@@ -197,8 +229,14 @@ where
 
     use_effect_with(price_lines, {
         let handle = handle.clone();
+        let values = values.clone();
 
         move |price_lines| {
+            if handle.borrow().is_none() {
+                values.borrow_mut().price_lines = price_lines.clone();
+                return;
+            }
+
             if let Some(handle) = handle.borrow().as_ref() {
                 if let Err(err) = handle.set_price_lines(price_lines) {
                     err.with_prefix("Failed to set price lines")

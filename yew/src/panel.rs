@@ -24,15 +24,15 @@ pub fn ChartPanel(props: &ChartPanelProps) -> Html {
     let chart = use_chart();
     let queue = use_mount_queue();
     let slot = use_memo((), |_| PanelSlot::default());
+    // Latest options, kept by the update effect until the pane is allocated.
     let options = use_mut_ref(|| None::<PaneOptions>);
     let node = use_node_ref();
-
-    *options.borrow_mut() = props.options.clone();
 
     use_effect_with((), {
         let chart = chart.clone();
         let slot = slot.clone();
         let node = node.clone();
+        let options = options.clone();
 
         move |_| {
             let alive = Alive::new();
@@ -48,8 +48,8 @@ pub fn ChartPanel(props: &ChartPanelProps) -> Html {
                     let panel = chart.allocate_panel();
 
                     slot.set(panel);
-                    if let Some(options) = options.borrow().as_ref() {
-                        if let Err(err) = chart.configure_pane(panel, options) {
+                    if let Some(options) = options.borrow_mut().take() {
+                        if let Err(err) = chart.configure_pane(panel, &options) {
                             err.with_prefix("Failed to configure the pane").log();
                         }
                     }
@@ -60,15 +60,18 @@ pub fn ChartPanel(props: &ChartPanelProps) -> Html {
         }
     });
 
+    // The effect runs when the options change, so the options are not copied at every render.
     use_effect_with(props.options.clone(), {
         let slot = slot.clone();
 
-        move |options| {
-            if let (Some(panel), Some(options)) = (slot.get(), options) {
-                if let Err(err) = chart.configure_pane(panel, options) {
+        move |new_options| match (slot.get(), new_options) {
+            (Some(panel), Some(new_options)) => {
+                if let Err(err) = chart.configure_pane(panel, new_options) {
                     err.with_prefix("Failed to configure the pane").log();
                 }
             }
+            (Some(_), None) => {}
+            (None, _) => *options.borrow_mut() = new_options.clone(),
         }
     });
 

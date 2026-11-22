@@ -1,7 +1,7 @@
 use crate::{
     data::{Marker, OhlcvData, PriceLineOptions, PriceSeriesStyle, PriceVolume, SeriesMarkersOptions, VolumeColors},
     mount::{marker, use_mount_queue},
-    series::mount::{use_series, SeriesCell},
+    series::mount::{use_series, SeriesCell, SeriesValues},
     series_data::histograms::HistogramSeriesOptions,
 };
 
@@ -68,30 +68,32 @@ pub fn PriceVolumeSeries(props: &PriceVolumeSeriesProps) -> Html {
     let price = use_series(
         &node,
         props.style.series_type(),
-        Some(props.style.clone()),
-        price_data,
-        props.markers.clone(),
-        props.markers_options.clone(),
-        props.price_lines.clone(),
+        SeriesValues {
+            options:         Some(props.style.clone()),
+            data:            price_data,
+            markers:         props.markers.clone(),
+            markers_options: props.markers_options.clone(),
+            price_lines:     props.price_lines.clone(),
+        },
     );
     let volume = use_series(
         &node,
         "histogram",
-        Some(PriceVolume::volume_options(props.volume_options.clone())),
-        volume_data,
-        Vec::new(),
-        None,
-        Vec::new(),
+        SeriesValues {
+            options: Some(PriceVolume::volume_options(props.volume_options.clone())),
+            data: volume_data,
+            ..SeriesValues::default()
+        },
     );
+    // Latest volume height, kept by the update effect until the series are added.
     let volume_height = use_mut_ref(|| props.volume_height);
-
-    *volume_height.borrow_mut() = props.volume_height;
 
     // Queued after the mounts of both series, for the same marker: it runs once they are added.
     use_effect_with((), {
         let price = price.clone();
         let volume = volume.clone();
         let node = node.clone();
+        let volume_height = volume_height.clone();
 
         move |_| {
             queue.push(&node, move || {
@@ -100,8 +102,9 @@ pub fn PriceVolumeSeries(props: &PriceVolumeSeriesProps) -> Html {
         }
     });
 
-    use_effect_with(props.volume_height, move |volume_height| {
-        apply_scale_margins(&price, &volume, *volume_height)
+    use_effect_with(props.volume_height, move |new_height| {
+        *volume_height.borrow_mut() = *new_height;
+        apply_scale_margins(&price, &volume, *new_height)
     });
 
     marker(&node)

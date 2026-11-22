@@ -2,7 +2,7 @@ use super::AreaSeriesOptions;
 use crate::{
     data::{ValueData, Marker, PriceLineOptions, SeriesMarkersOptions},
     mount::marker,
-    series::mount::use_series,
+    series::mount::{use_series, SeriesValues},
 };
 
 use yew::prelude::*;
@@ -31,11 +31,13 @@ pub fn AreaSeries(props: &AreaSeriesProps) -> Html {
     use_series(
         &node,
         "area",
-        props.options.clone(),
-        props.data.clone(),
-        props.markers.clone(),
-        props.markers_options.clone(),
-        props.price_lines.clone(),
+        SeriesValues {
+            options:         props.options.clone(),
+            data:            props.data.clone(),
+            markers:         props.markers.clone(),
+            markers_options: props.markers_options.clone(),
+            price_lines:     props.price_lines.clone(),
+        },
     );
 
     marker(&node)

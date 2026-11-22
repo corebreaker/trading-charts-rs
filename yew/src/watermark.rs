@@ -21,14 +21,14 @@ pub fn TextWatermark(props: &TextWatermarkProps) -> Html {
     let panel = use_panel();
     let node = use_node_ref();
     let id = use_mut_ref(|| None::<String>);
-    let options = use_mut_ref(|| props.options.clone());
-
-    *options.borrow_mut() = props.options.clone();
+    // Latest options, kept by the update effect until the watermark is added.
+    let options = use_mut_ref(TextWatermarkOptions::default);
 
     use_effect_with((), {
         let chart = chart.clone();
         let id = id.clone();
         let node = node.clone();
+        let options = options.clone();
 
         move |_| {
             let alive = Alive::new();
@@ -63,12 +63,14 @@ pub fn TextWatermark(props: &TextWatermarkProps) -> Html {
         }
     });
 
-    use_effect_with(props.options.clone(), move |options| {
-        if let Some(id) = id.borrow().as_ref() {
-            if let Err(err) = chart.update_text_watermark(id, options) {
+    // The effect runs when the options change, so the options are not copied at every render.
+    use_effect_with(props.options.clone(), move |new_options| match id.borrow().as_ref() {
+        Some(id) => {
+            if let Err(err) = chart.update_text_watermark(id, new_options) {
                 err.with_prefix("Failed to update the text watermark").log();
             }
         }
+        None => *options.borrow_mut() = new_options.clone(),
     });
 
     marker(&node)
@@ -93,16 +95,16 @@ pub fn ImageWatermark(props: &ImageWatermarkProps) -> Html {
     let node = use_node_ref();
     // URL and identifier of the watermark, once it is added.
     let current = use_mut_ref(|| None::<(AttrValue, String)>);
-    let latest = use_mut_ref(|| (props.url.clone(), props.options.clone()));
+    // Latest URL and options, kept by the update effect until the watermark is added.
+    let latest = use_mut_ref(|| None::<(AttrValue, ImageWatermarkOptions)>);
     let panel_index = move || panel.as_ref().and_then(|panel| panel.get()).unwrap_or(0);
-
-    *latest.borrow_mut() = (props.url.clone(), props.options.clone());
 
     use_effect_with((), {
         let chart = chart.clone();
         let current = current.clone();
         let node = node.clone();
         let panel_index = panel_index.clone();
+        let latest = latest.clone();
 
         move |_| {
             let alive = Alive::new();
@@ -117,7 +119,9 @@ pub fn ImageWatermark(props: &ImageWatermarkProps) -> Html {
                         return;
                     }
 
-                    let (url, options) = latest.borrow().clone();
+                    let Some((url, options)) = latest.borrow_mut().take() else {
+                        return;
+                    };
 
                     match chart.add_image_watermark(panel_index(), &url, &options) {
                         Ok(id) => *current.borrow_mut() = Some((url, id)),
@@ -138,8 +142,10 @@ pub fn ImageWatermark(props: &ImageWatermarkProps) -> Html {
     });
 
     // Before the watermark is added, there is nothing to update: it is added with the latest URL and options.
+    // The effect runs when they change, so they are not copied at every render.
     use_effect_with((props.url.clone(), props.options.clone()), move |(url, options)| {
         let Some((current_url, id)) = current.borrow_mut().take() else {
+            *latest.borrow_mut() = Some((url.clone(), options.clone()));
             return;
         };
         let res = if current_url == *url {
