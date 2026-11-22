@@ -1,0 +1,26 @@
+[build]
+target = "./index.html"
+
+[watch]
+watch = [
+    ".",
+    "../style.css",
+    "../../core/src",
+    "../../core/build.rs",
+    "../../core/Cargo.toml",
+    "../../core/bindings/src",
+    "../../core/bindings/builder",
+    "../../core/bindings/package.json",
+    "../../yew/src",
+    "../../yew/Cargo.toml",
+]
+
+ignores = [
+    "./dist",
+    "./README.md",
+]
+
+[serve]
+addresses = ["127.0.0.1"]
+port = 1423
+open = false

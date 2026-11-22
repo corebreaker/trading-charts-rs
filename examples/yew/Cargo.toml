@@ -1,0 +1,24 @@
+[package]
+name = "trading-charts-example-yew"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description.workspace = true
+repository.workspace = true
+documentation.workspace = true
+readme.workspace = true
+license.workspace = true
+keywords.workspace = true
+categories.workspace = true
+publish = false
+
+[dependencies]
+serde = { version = "~1.0", features = ["derive"] }
+serde_json = "~1.0"
+
+charts = { path = "../../yew", package = "trading-charts-yew" }
+
+console_error_panic_hook = { workspace = true }
+console_log = { workspace = true }
+yew = { workspace = true }
+log = { workspace = true }

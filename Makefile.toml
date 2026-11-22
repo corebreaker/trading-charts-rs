@@ -13,6 +13,7 @@ skip_crate_env_info = true
 [env]
 LEPTOS_EXAMPLE_DIR = "examples/leptos"
 DIOXUS_EXAMPLE_DIR = "examples/dioxus"
+YEW_EXAMPLE_DIR = "examples/yew"
 CORE_BINDINGS_DIR = "core/bindings"
 WASM_TARGET = "wasm32-unknown-unknown"
 LIGHTWEIGHT_CHARTS_VERSION = { value = "latest", condition = { env_not_set = ["LIGHTWEIGHT_CHARTS_VERSION"] } }
@@ -65,7 +66,7 @@ args = ["check", "--workspace", "--target", "${WASM_TARGET}"]
 description = "Run the tests of the core crate and the README examples of the library crates."
 category = "Development"
 command = "cargo"
-args = ["test", "-p", "trading-charts-core", "-p", "trading-charts", "-p", "trading-charts-dioxus"]
+args = ["test", "-p", "trading-charts-core", "-p", "trading-charts", "-p", "trading-charts-dioxus", "-p", "trading-charts-yew"]
 
 [tasks.clippy]
 description = "Run clippy for the workspace on the wasm32 target."
@@ -74,7 +75,7 @@ command = "cargo"
 args = ["clippy", "--workspace", "--target", "${WASM_TARGET}"]
 
 [tasks.verify]
-description = "Run fmt, check, check-wasm, clippy, test, and build both examples."
+description = "Run fmt, check, check-wasm, clippy, test, and build the examples."
 category = "Development"
 dependencies = ["fmt", "check", "check-wasm", "clippy", "test", "build-examples"]
 
@@ -98,10 +99,18 @@ env = { NO_COLOR = "false" }
 command = "trunk"
 args = ["build"]
 
-[tasks.build-examples]
-description = "Build both examples with trunk."
+[tasks.build-example-yew]
+description = "Build the Yew example with trunk."
 category = "Examples"
-dependencies = ["build-example", "build-example-dioxus"]
+cwd = "${YEW_EXAMPLE_DIR}"
+env = { NO_COLOR = "false" }
+command = "trunk"
+args = ["build"]
+
+[tasks.build-examples]
+description = "Build the examples with trunk."
+category = "Examples"
+dependencies = ["build-example", "build-example-dioxus", "build-example-yew"]
 
 [tasks.serve-example]
 description = "Serve the Leptos example on its Trunk.toml port."
@@ -119,6 +128,14 @@ env = { NO_COLOR = "false" }
 command = "trunk"
 args = ["serve"]
 
+[tasks.serve-example-yew]
+description = "Serve the Yew example on its Trunk.toml port."
+category = "Examples"
+cwd = "${YEW_EXAMPLE_DIR}"
+env = { NO_COLOR = "false" }
+command = "trunk"
+args = ["serve"]
+
 [tasks.clean-examples]
 description = "Remove the dist and .trunk artifacts of the examples."
 category = "Examples"
@@ -126,6 +143,7 @@ script_runner = "@duckscript"
 script = '''
 rm -r ${LEPTOS_EXAMPLE_DIR}/dist ${LEPTOS_EXAMPLE_DIR}/.trunk
 rm -r ${DIOXUS_EXAMPLE_DIR}/dist ${DIOXUS_EXAMPLE_DIR}/.trunk
+rm -r ${YEW_EXAMPLE_DIR}/dist ${YEW_EXAMPLE_DIR}/.trunk
 '''
 
 # ---------------------------------------------------------------------------------------------------------------------
