@@ -4,6 +4,7 @@ debug/
 target/
 examples/leptos/dist/
 examples/dioxus/dist/
+examples/yew/dist/
 core/bindings/node_modules/
 core/bindings/target/
 

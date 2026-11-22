@@ -15,7 +15,8 @@ one tab per group of features:
 - **Panes & watermarks**: several panes, text and image watermarks, pane swapping and screenshots.
 - **Multi-charts**: two charts sharing their crosshair and visible range.
 
-The [Dioxus example](../dioxus) is the same gallery written with the Dioxus components.
+The [Dioxus example](../dioxus) and the [Yew example](../yew) are the same gallery,
+written with the Dioxus and Yew components.
 
 ## Run
 

@@ -67,17 +67,17 @@ jobs:
           direct_prompt: |
             You are a code-review expert. Before any analysis, read `CLAUDE.md` at the repository
             root when it exists, the root `README.md` and the READMEs of the crates (`core`,
-            `leptos` and `dioxus` directories), and strictly apply the project conventions:
+            `leptos`, `dioxus` and `yew` directories), and strictly apply the project conventions:
             English-only code, identifiers, comments, doc-strings and test names; formatting with
             `cargo +nightly fmt` only (never stable fmt) within the 120 columns of `.rustfmt.toml`,
-            including inside the `view!` and `rsx!` macros, which rustfmt does not reformat;
+            including inside the `view!`, `rsx!` and `html!` macros, which rustfmt does not reformat;
             documentation and Markdown lines of at most 120 columns, wrapped preferably at
             punctuation; errors returned as `Result<_, JsError>` and logged by the adapters, no
             `unwrap` in library code where an error can occur; option structs mirroring the
             Lightweight Charts typings (every field an `Option` skipped when `None`, serialized in
             camelCase, with `with_*` builders, getters and setters); every JS method or export used
             from Rust declared in `core/src/bindings/js.rs`; the core crate kept framework-agnostic,
-            and the component features provided by both the Leptos and the Dioxus adapters.
+            and the component features provided by all the adapters (Leptos, Dioxus and Yew).
 
             Review PR #${{ github.event.issue.number }}:
 
@@ -206,17 +206,17 @@ jobs:
           direct_prompt: |
             You are a code-review expert. Before any analysis, read `CLAUDE.md` at the repository
             root when it exists, the root `README.md` and the READMEs of the crates (`core`,
-            `leptos` and `dioxus` directories), and strictly apply the project conventions:
+            `leptos`, `dioxus` and `yew` directories), and strictly apply the project conventions:
             English-only code, identifiers, comments, doc-strings and test names; formatting with
             `cargo +nightly fmt` only (never stable fmt) within the 120 columns of `.rustfmt.toml`,
-            including inside the `view!` and `rsx!` macros, which rustfmt does not reformat;
+            including inside the `view!`, `rsx!` and `html!` macros, which rustfmt does not reformat;
             documentation and Markdown lines of at most 120 columns, wrapped preferably at
             punctuation; errors returned as `Result<_, JsError>` and logged by the adapters, no
             `unwrap` in library code where an error can occur; option structs mirroring the
             Lightweight Charts typings (every field an `Option` skipped when `None`, serialized in
             camelCase, with `with_*` builders, getters and setters); every JS method or export used
             from Rust declared in `core/src/bindings/js.rs`; the core crate kept framework-agnostic,
-            and the component features provided by both the Leptos and the Dioxus adapters.
+            and the component features provided by all the adapters (Leptos, Dioxus and Yew).
 
             Review PR #${{ github.event.issue.number }}:
 

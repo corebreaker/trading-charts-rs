@@ -15,7 +15,8 @@ the [Dioxus] web components for [Lightweight Charts], one tab per group of featu
 - **Panes & watermarks**: several panes, text and image watermarks, pane swapping and screenshots.
 - **Multi-charts**: two charts sharing their crosshair and visible range.
 
-The [Leptos example](../leptos) is the same gallery written with the Leptos components.
+The [Leptos example](../leptos) and the [Yew example](../yew) are the same gallery,
+written with the Leptos and Yew components.
 
 ## Run
 

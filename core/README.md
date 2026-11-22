@@ -5,8 +5,9 @@
 Framework-agnostic core of the Rust bindings of [Lightweight Charts] 5.3:
 the chart handle, the data and option types, and the JS binding.
 
-The [Leptos](https://crates.io/crates/trading-charts) and [Dioxus](https://crates.io/crates/trading-charts-dioxus)
-adapters are built on this crate and re-export it: use them in an application of these frameworks.
+The [Leptos](https://crates.io/crates/trading-charts), [Dioxus](https://crates.io/crates/trading-charts-dioxus)
+and [Yew](https://crates.io/crates/trading-charts-yew) adapters are built on this crate and re-export it:
+use them in an application of these frameworks.
 Use this crate directly to drive charts without a framework, or to write an adapter for another framework.
 
 ## Chart handle

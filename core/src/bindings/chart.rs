@@ -77,6 +77,15 @@ pub struct ChartHandle {
 unsafe impl Send for ChartHandle {}
 unsafe impl Sync for ChartHandle {}
 
+/// Two handles are equal when they drive the same chart, as with [`ChartHandle::same_chart`].
+impl PartialEq for ChartHandle {
+    fn eq(&self, other: &Self) -> bool {
+        self.same_chart(other)
+    }
+}
+
+impl Eq for ChartHandle {}
+
 pub(crate) fn optional_value<T: DeserializeOwned>(value: JsValue) -> Result<Option<T>, JsError> {
     if value.is_null() || value.is_undefined() {
         return Ok(None);

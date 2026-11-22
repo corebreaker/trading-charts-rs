@@ -1,4 +1,4 @@
-# Plan to generalize `rs-trading-charts` for Dioxus
+# Plan to generalize `trading-charts-rs` for Dioxus
 
 ## Status
 
@@ -12,6 +12,12 @@ and records how each part of the plan was carried out.
   The panels are explicit `PanelId` contexts, the series are created once and removed when their component is
   unmounted, and the Dioxus series update the chart only when a prop value changes.
 - `examples/leptos` and `examples/dioxus` are the same gallery of demos, and each crate has its own README.
+
+Version 1.1 adds a third adapter on the same model: `trading-charts-yew` (Yew client-side rendering),
+in the `yew` directory, with its gallery in `examples/yew`.
+Yew creates the sibling components from the last to the first, so its first renders and effects do not follow
+the document order: the panels, series and watermarks render an invisible marker element, and are mounted
+in the document order of their markers, once the effects of the render are done (`yew/src/mount.rs`).
 
 Two items of the plan are only partly done, see [Open items](#open-items):
 there is no automated wasm test, and the behavior is validated by hand with the examples.
@@ -113,8 +119,9 @@ The workspace uses a core-plus-adapters layout:
 - `trading-charts-core` (`core`): the JS build pipeline, the wasm-bindgen layer, the data types and the handles.
 - `trading-charts` (`leptos`): the Leptos adapter, which keeps the Leptos-facing API.
 - `trading-charts-dioxus` (`dioxus`): the Dioxus web adapter, with components and hooks around the core.
+- `trading-charts-yew` (`yew`): the Yew adapter, added in 1.1, with components and hooks around the core.
 - `wasmbind-js-file-macro` (`wasmbind-macro`): unchanged.
-- `examples/leptos` and `examples/dioxus`: the same gallery of demos, written with each adapter.
+- `examples/leptos`, `examples/dioxus` and `examples/yew`: the same gallery of demos, written with each adapter.
 
 ### Why not a single dual-feature crate
 
