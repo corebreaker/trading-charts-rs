@@ -1,4 +1,4 @@
-# Plan to generalize `rs-trading-charts` for Dioxus
+# Plan to generalize `trading-charts-rs` for Dioxus
 
 ## Status
 

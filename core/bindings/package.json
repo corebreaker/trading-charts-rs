@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/corebreaker/rs-trading-charts.git"
+    "url": "git+https://github.com/corebreaker/trading-charts-rs.git"
   },
   "author": "Frédéric Meyer <frederic.meyer.77@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/corebreaker/rs-trading-charts/issues"
+    "url": "https://github.com/corebreaker/trading-charts-rs/issues"
   },
-  "homepage": "https://github.com/corebreaker/rs-trading-charts#readme",
+  "homepage": "https://github.com/corebreaker/trading-charts-rs#readme",
   "dependencies": {
     "@bundled-es-modules/uuid": "^3.3",
     "lightweight-charts": "^5.3"
