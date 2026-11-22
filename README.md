@@ -3,7 +3,7 @@
 
 # Trading-Charts
 Rust bindings of [Lightweight Charts] 5.3, the financial charts library of TradingView,
-with components for [Leptos] and [Dioxus].
+with components for [Leptos], [Dioxus] and [Yew].
 
 The charts are driven from Rust: options, data, markers, events and formatters are plain Rust types,
 and the JS library is bundled in the WebAssembly module, so there is no JS to write nor to load.
@@ -16,6 +16,7 @@ and the JS library is bundled in the WebAssembly module, so there is no JS to wr
 |--------------------------|------------------------------------|----------------------------------------------------|
 | `trading-charts`         | [`leptos`](leptos)                 | [Leptos] components.                               |
 | `trading-charts-dioxus`  | [`dioxus`](dioxus)                 | [Dioxus] components, for the web renderer.         |
+| `trading-charts-yew`     | [`yew`](yew)                       | [Yew] components, for the client-side rendering.   |
 | `trading-charts-core`    | [`core`](core)                     | Framework-agnostic chart handle, data and options. |
 | `wasmbind-js-file-macro` | [`wasmbind-macro`](wasmbind-macro) | Macro inlining the JS bundle into the wasm module. |
 
@@ -101,13 +102,39 @@ fn App() -> Element {
 }
 ```
 
+With Yew:
+
+```rust
+use yew::prelude::*;
+use trading_charts_yew::{
+    chart::Chart,
+    data::{options::ChartOptions, Candlestick, UTCTimestamp},
+    series::candlesticks::CandleStickSeries,
+};
+
+#[component]
+fn App() -> Html {
+    let time = |day: &str| day.parse::<UTCTimestamp>().unwrap();
+    let data = vec![
+        Candlestick::new(time("2024-01-02"), 10.0, 11.5, 9.5, 11.0),
+        Candlestick::new(time("2024-01-03"), 11.0, 12.0, 10.5, 10.8),
+    ];
+
+    html! {
+        <Chart options={ChartOptions::new().with_auto_size(true)} style="height:400px">
+            <CandleStickSeries {data} />
+        </Chart>
+    }
+}
+```
+
 The crate READMEs describe the components and the core API in more detail.
 
 ## Examples
 
-[`examples/leptos`](examples/leptos) and [`examples/dioxus`](examples/dioxus) are the same gallery of demos,
-one tab per group of features, written with each adapter.
-Serve them with `cargo make serve-example` and `cargo make serve-example-dioxus`.
+[`examples/leptos`](examples/leptos), [`examples/dioxus`](examples/dioxus) and [`examples/yew`](examples/yew)
+are the same gallery of demos, one tab per group of features, written with each adapter.
+Serve them with `cargo make serve-example`, `cargo make serve-example-dioxus` and `cargo make serve-example-yew`.
 
 ## Development
 
@@ -121,9 +148,9 @@ Run `cargo make` from the workspace root to list them, for instance:
 - `cargo make fmt`: format the workspace (requires the nightly toolchain).
 - `cargo make check-wasm`: check the workspace on the `wasm32-unknown-unknown` target.
 - `cargo make clippy`: lint the workspace with clippy on the `wasm32-unknown-unknown` target.
-- `cargo make test`: run the tests of the core crate.
-- `cargo make serve-example` / `cargo make serve-example-dioxus`: serve an example with Trunk.
-- `cargo make verify`: format, check, lint, test and build both examples.
+- `cargo make test`: run the tests of the core crate and the README examples of the adapters.
+- `cargo make serve-example` / `serve-example-dioxus` / `serve-example-yew`: serve an example with Trunk.
+- `cargo make verify`: format, check, lint, test and build the examples.
 
 ## Updating Lightweight Charts
 
@@ -146,3 +173,4 @@ apply to the applications using it, the attribution logo shown by default being 
 [Lightweight Charts]: https://github.com/tradingview/lightweight-charts
 [Leptos]: https://leptos.dev/
 [Dioxus]: https://dioxuslabs.com/
+[Yew]: https://yew.rs/
